@@ -1,13 +1,18 @@
 import { ArrowUpRight, MapPin } from "lucide-react";
-import FruitArt from "./FruitArt.jsx";
+
 
 export default function About() {
   return (
     <section className="about section-pad" id="historia" aria-labelledby="about-title">
       <div className="section-wrap about-grid">
         <div className="about-art">
-          <div className="about-art-frame"><FruitArt fruit="chirimoya" /></div>
-          <div className="about-caption"><span>SANTA CRUZ · BOLIVIA</span><strong>Hecho con raíces.</strong></div>
+<div className="about-art-frame">
+  <img
+    src={`${import.meta.env.BASE_URL}images/brand/nativ-raiz.webp`}
+    alt="Frutas tropicales de Santa Cruz utilizadas en NATIV"
+    className="about-root-image"
+  />
+</div>          <div className="about-caption"><span>SANTA CRUZ · BOLIVIA</span><strong>Hecho con raíces.</strong></div>
           <div className="about-side-label">UNA HISTORIA DE AQUÍ</div>
         </div>
         <div className="about-copy">
