@@ -14,7 +14,11 @@ export default function OrderSection({ products, presentations, onAdd }) {
 
   if (!selectedProduct || !selectedPresentation) return null;
 
-  const imageSource = `${import.meta.env.BASE_URL}${selectedPresentation.image.replace(/^\//, "")}`;
+  const productImage =
+  selectedProduct?.presentationImages?.[selectedPresentation.id] ||
+  selectedPresentation.image;
+
+const imageSource = `${import.meta.env.BASE_URL}${productImage.replace(/^\/+/, "")}`;
   const price = selectedProduct.prices[presentationId];
 
   function choosePresentation(id) {
