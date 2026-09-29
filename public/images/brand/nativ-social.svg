@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f7f5ee"/>
+  <circle cx="934" cy="280" r="198" fill="#e2b64f"/>
+  <circle cx="934" cy="280" r="143" fill="#d99a45"/>
+  <path d="M874 351c-62-84-28-177 65-214 24 79 1 160-65 214Z" fill="#66835f"/>
+  <path d="M897 320c18-47 37-82 74-122" fill="none" stroke="#f7f5ee" stroke-width="7"/>
+  <text x="96" y="147" fill="#66835f" font-family="Arial,sans-serif" font-size="22" letter-spacing="8">YOGUR ARTESANAL · SANTA CRUZ, BOLIVIA</text>
+  <text x="88" y="325" fill="#263b2e" font-family="Georgia,serif" font-size="124">NATIV</text>
+  <circle cx="455" cy="295" r="11" fill="#b88a63"/>
+  <text x="98" y="407" fill="#263b2e" font-family="Georgia,serif" font-size="43">El sabor de nuestra tierra.</text>
+  <path d="M99 454h450" stroke="#b88a63" stroke-width="2"/>
+  <text x="100" y="504" fill="#526052" font-family="Arial,sans-serif" font-size="20">CHIRIMOYA · ACHACHAIRÚ · MARACUYÁ · COPOAZÚ</text>
+</svg>
