@@ -1,25 +1,70 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Minus, Plus, ShoppingBasket } from "lucide-react";
 import { formatBolivianos } from "../utils/currency.js";
+
+function getImageSource(imagePath) {
+  return `${import.meta.env.BASE_URL}${imagePath.replace(/^\/+/, "")}`;
+}
 
 export default function OrderSection({ products, presentations, onAdd }) {
   const [productId, setProductId] = useState(products[0]?.id ?? "");
   const [presentationId, setPresentationId] = useState(presentations[0]?.id ?? "");
   const [quantity, setQuantity] = useState(1);
   const [photoUnavailable, setPhotoUnavailable] = useState(false);
+  const sectionRef = useRef(null);
   const selectedProduct = products.find((product) => product.id === productId) ?? products[0];
   const selectedPresentation = presentations.find(
     (presentation) => presentation.id === presentationId,
   ) ?? presentations[0];
 
+  useEffect(() => {
+    const imageSources = new Set(
+      [
+        ...products.flatMap((product) => Object.values(product.presentationImages ?? {})),
+        ...presentations.map((presentation) => presentation.image),
+      ]
+        .filter((imagePath) => typeof imagePath === "string" && imagePath.length > 0)
+        .map(getImageSource),
+    );
+
+    const preloadImages = () => {
+      imageSources.forEach((imageSource) => {
+        const image = new Image();
+        image.src = imageSource;
+      });
+    };
+
+    if (!("IntersectionObserver" in window) || !sectionRef.current) {
+      preloadImages();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          preloadImages();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, [products, presentations]);
+
   if (!selectedProduct || !selectedPresentation) return null;
 
   const productImage =
-  selectedProduct?.presentationImages?.[selectedPresentation.id] ||
-  selectedPresentation.image;
-
-const imageSource = `${import.meta.env.BASE_URL}${productImage.replace(/^\/+/, "")}`;
+    selectedProduct?.presentationImages?.[selectedPresentation.id] ||
+    selectedPresentation.image;
+  const imageSource = getImageSource(productImage);
   const price = selectedProduct.prices[presentationId];
+
+  function chooseProduct(id) {
+    setProductId(id);
+    setPhotoUnavailable(false);
+  }
 
   function choosePresentation(id) {
     setPresentationId(id);
@@ -27,7 +72,7 @@ const imageSource = `${import.meta.env.BASE_URL}${productImage.replace(/^\/+/, "
   }
 
   return (
-    <section className="orders section-pad" id="pedidos" aria-labelledby="orders-title">
+    <section ref={sectionRef} className="orders section-pad" id="pedidos" aria-labelledby="orders-title">
       <div className="section-wrap">
         <div className="section-heading order-heading">
           <div>
@@ -46,6 +91,8 @@ const imageSource = `${import.meta.env.BASE_URL}${productImage.replace(/^\/+/, "
                 className="configurator-package-photo"
                 src={imageSource}
                 alt={`Envase NATIV de ${selectedPresentation.label}`}
+                loading="eager"
+                fetchPriority="high"
                 onError={() => setPhotoUnavailable(true)}
               />
             )}
@@ -71,7 +118,7 @@ const imageSource = `${import.meta.env.BASE_URL}${productImage.replace(/^\/+/, "
                     key={product.id}
                     type="button"
                     aria-pressed={product.id === productId}
-                    onClick={() => setProductId(product.id)}
+                    onClick={() => chooseProduct(product.id)}
                   >
                     <span className={`flavor-option-swatch swatch-${product.id}`} aria-hidden="true" />
                     <span>{product.name}</span>
