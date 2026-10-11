@@ -3,7 +3,7 @@ export const business = {
   tagline: "Yogur artesanal con el sabor de nuestra tierra",
   location: "Santa Cruz, Bolivia",
   whatsapp: {
-    phone: "",
+phone: import.meta.env.VITE_WHATSAPP_NUMBER || "",
     greeting: "Hola, NATIV. Quisiera hacer este pedido:",
   },
   contact: {
