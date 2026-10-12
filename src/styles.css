@@ -527,3 +527,240 @@ h1, h2, h3, p { margin-top: 0; }
   opacity: 0.65;
   cursor: not-allowed;
 }
+.admin-page {
+  min-height: 100vh;
+  background: #f7f2e7;
+  color: #173c2b;
+  padding: 48px 24px;
+}
+
+.admin-login,
+.admin-header,
+.admin-orders,
+.admin-empty {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+}
+
+.admin-login {
+  max-width: 520px;
+  background: #fffdf7;
+  border: 1px solid rgba(23, 60, 43, 0.12);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 14px 40px rgba(23, 60, 43, 0.08);
+}
+
+.admin-login h1,
+.admin-header h1 {
+  margin: 8px 0 10px;
+  font-family: "Fraunces", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  color: #173c2b;
+}
+
+.admin-login > p {
+  color: #6f7f75;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.admin-login form {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-login label {
+  display: grid;
+  gap: 7px;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.admin-login input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 15px;
+  border: 1px solid rgba(23, 60, 43, 0.2);
+  border-radius: 12px;
+  background: white;
+  font: inherit;
+  color: #173c2b;
+  outline: none;
+}
+
+.admin-login input:focus {
+  border-color: #315b42;
+  box-shadow: 0 0 0 3px rgba(49, 91, 66, 0.1);
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-end;
+  margin-bottom: 28px;
+}
+
+.admin-header p {
+  margin: 4px 0 0;
+  color: #748077;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-actions .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-orders {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-order-card {
+  background: #fffdf7;
+  border: 1px solid rgba(23, 60, 43, 0.12);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 10px 28px rgba(23, 60, 43, 0.05);
+}
+
+.admin-order-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.admin-order-number {
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7e8a82;
+  margin-bottom: 5px;
+}
+
+.admin-order-card h2 {
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-size: 1.35rem;
+  color: #173c2b;
+}
+
+.admin-status {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #eef2ec;
+  color: #315b42;
+}
+
+.admin-status-pending_whatsapp {
+  background: #fff4d8;
+  color: #896418;
+}
+
+.admin-status-whatsapp_opened {
+  background: #e7f4ed;
+  color: #23613d;
+}
+
+.admin-status-confirmed {
+  background: #dff0e5;
+  color: #1f643b;
+}
+
+.admin-status-cancelled {
+  background: #f8e2e2;
+  color: #8f3434;
+}
+
+.admin-customer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(23, 60, 43, 0.1);
+  border-bottom: 1px solid rgba(23, 60, 43, 0.1);
+  font-size: 0.92rem;
+  color: #47594e;
+}
+
+.admin-items {
+  display: grid;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.admin-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f4efe3;
+  text-transform: capitalize;
+}
+
+.admin-order-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid rgba(23, 60, 43, 0.1);
+}
+
+.admin-order-total strong {
+  font-size: 1.1rem;
+}
+
+.admin-error {
+  width: min(1100px, 100%);
+  margin: 0 auto 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8e2e2;
+  color: #8f3434;
+}
+
+.admin-empty {
+  background: #fffdf7;
+  border: 1px solid rgba(23, 60, 43, 0.12);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+@media (max-width: 760px) {
+  .admin-page {
+    padding: 28px 16px;
+  }
+
+  .admin-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-customer {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-order-top {
+    flex-direction: column;
+  }
+
+  .admin-status {
+    align-self: flex-start;
+  }
+}
