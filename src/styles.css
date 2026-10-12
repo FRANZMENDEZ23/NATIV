@@ -465,3 +465,65 @@ h1, h2, h3, p { margin-top: 0; }
   .configurator-add { width: 100%; }
   .configurator-note { text-align: left; }
 }
+.cart-customer-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(31, 63, 45, 0.14);
+}
+
+.cart-customer-form h3 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1f3f2d;
+}
+
+.cart-customer-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2e4738;
+}
+
+.cart-customer-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid rgba(31, 63, 45, 0.2);
+  border-radius: 12px;
+  background: #fffdf7;
+  color: #1f2f27;
+  font: inherit;
+  outline: none;
+}
+
+.cart-customer-form input::placeholder {
+  color: #9aa39d;
+}
+
+.cart-customer-form input:focus {
+  border-color: #315b42;
+  box-shadow: 0 0 0 3px rgba(49, 91, 66, 0.1);
+}
+
+.cart-order-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(155, 58, 58, 0.08);
+  color: #8f3434;
+  font-size: 0.9rem;
+}
+
+.cart-customer-form .cart-submit {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.cart-customer-form .cart-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
