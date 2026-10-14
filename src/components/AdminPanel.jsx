@@ -126,41 +126,42 @@ export default function AdminPanel() {
     setError("");
 
     const { data, error: ordersError } = await supabase
-      .from("orders")
-      .select(`
-        id,
-        order_number,
-        status,
-        delivery_method,
-        delivery_address,
-        delivery_reference,
-        payment_method,
-        payment_status,
-        total_amount,
-        currency,
-        created_at,
-        customers (
-          full_name,
-          phone,
-          email
-        ),
-       order_items (
-  id,
-  flavor,
-  size,
-  quantity,
-  unit_price,
-  product_code
-)
-      `)
-      .order("created_at", { ascending: false });
+  .from("orders")
+  .select(`
+    id,
+    order_number,
+    status,
+    delivery_method,
+    delivery_address,
+    delivery_reference,
+    payment_method,
+    payment_status,
+    total_amount,
+    currency,
+    created_at,
+    customers (
+      full_name,
+      phone,
+      email,
+      nit
+    ),
+    order_items (
+      id,
+      flavor,
+      size,
+      quantity,
+      unit_price,
+      product_code
+    )
+  `)
+  .order("created_at", { ascending: false });
 
     if (ordersError) {
       console.error(ordersError);
       setError(
         "No se pudieron cargar los pedidos. Verifica que esta cuenta tenga permiso de administrador."
       );
-      setOrders([]);
+    setOrders([]);
     } else {
       setOrders(data || []);
     }
@@ -323,22 +324,27 @@ export default function AdminPanel() {
                 </span>
               </div>
 
-              <div className="admin-customer">
-                <span>
-                  <strong>WhatsApp:</strong>{" "}
-                  {order.customers?.phone || "—"}
-                </span>
+             <div className="admin-customer">
+  <span>
+    <strong>WhatsApp:</strong>{" "}
+    {order.customers?.phone || "—"}
+  </span>
 
-                <span>
-                  <strong>Correo:</strong>{" "}
-                  {order.customers?.email || "—"}
-                </span>
+  <span>
+    <strong>Correo:</strong>{" "}
+    {order.customers?.email || "—"}
+  </span>
 
-                <span>
-                  <strong>Fecha:</strong>{" "}
-                  {new Date(order.created_at).toLocaleString("es-BO")}
-                </span>
-              </div>
+  <span>
+    <strong>NIT:</strong>{" "}
+    {order.customers?.nit || "—"}
+  </span>
+
+  <span>
+    <strong>Fecha:</strong>{" "}
+    {new Date(order.created_at).toLocaleString("es-BO")}
+  </span>
+</div>
 
               <div className="admin-order-meta">
                 <div>

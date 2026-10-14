@@ -28,10 +28,11 @@ export default function Cart({
   const cartPanel = useRef(null);
 
   const [customer, setCustomer] = useState({
-    name: "",
-    phone: "",
-    email: "",
-  });
+  name: "",
+  phone: "",
+  email: "",
+  nit: "",
+});
 
   const [delivery, setDelivery] = useState({
     method: "pickup",
@@ -414,6 +415,16 @@ export default function Cart({
                   placeholder="Opcional"
                 />
               </label>
+              <label>
+  NIT
+  <input
+    type="text"
+    name="nit"
+    value={customer.nit}
+    onChange={handleCustomerChange}
+    placeholder="Opcional"
+  />
+</label>
 
               <div className="checkout-section">
                 <h3>¿Cómo recibirás tu pedido?</h3>

@@ -46,10 +46,11 @@ export async function saveOrder({
     throw new Error("El pedido no contiene productos.");
   }
 
-  const { data, error } = await supabase.rpc("create_web_order_v2", {
+  const { data, error } = await supabase.rpc("create_web_order_v3", {
     p_full_name: customer.name.trim(),
     p_phone: customer.phone.trim(),
     p_email: customer.email?.trim() || null,
+    p_nit: customer.nit?.trim() || null,
     p_session_id: getSessionId(),
     p_items: items,
     p_total_amount: null,
