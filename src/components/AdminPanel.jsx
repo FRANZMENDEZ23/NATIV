@@ -603,28 +603,29 @@ onClick={() => {
   </span>
 )}
 
-order.status !== "cancelled" &&
-order.status !== "cancelado" &&
-order.status !== "delivered" &&
-order.status !== "entregado"
-      <button
-        type="button"
-        className="admin-cancel-action"
-        disabled={updatingId === order.id}
-        onClick={() => {
-          const confirmed = window.confirm(
-            "¿Seguro que deseas cancelar este pedido?"
-          );
+{order.status !== "cancelled" &&
+  order.status !== "cancelado" &&
+  order.status !== "delivered" &&
+  order.status !== "entregado" && (
+    <button
+      type="button"
+      className="admin-cancel-action"
+      disabled={updatingId === order.id}
+      onClick={() => {
+        const confirmed = window.confirm(
+          "¿Seguro que deseas cancelar este pedido?"
+        );
 
-          if (confirmed) {
-            updateOrder(order.id, {
-              status: "cancelado",
-            });
-          }
-        }}
-      >
-        Cancelar pedido
-      </button>
+        if (confirmed) {
+          updateOrder(order.id, {
+            status: "cancelado",
+          });
+        }
+      }}
+    >
+      Cancelar pedido
+    </button>
+  )}
     
 </div>
 
