@@ -3,10 +3,24 @@ import { LogOut, RefreshCw } from "lucide-react";
 import { supabase } from "../lib/supabase.js";
 
 const statusLabels = {
-  pending_whatsapp: "Pendiente en WhatsApp",
-  whatsapp_opened: "WhatsApp abierto",
   confirmed: "Confirmado",
+  preparing: "Preparando",
+  ready_for_pickup: "Listo para retirar",
+  out_for_delivery: "En camino",
+  delivered: "Entregado",
   cancelled: "Cancelado",
+  pending_whatsapp: "Pendiente en WhatsApp",
+};
+
+const paymentLabels = {
+  qr: "Código QR",
+  cash: "Efectivo",
+  card_in_person: "Tarjeta en persona",
+};
+
+const deliveryLabels = {
+  pickup: "Retiro en tienda",
+  delivery: "Envío a domicilio",
 };
 
 export default function AdminPanel() {
@@ -16,6 +30,7 @@ export default function AdminPanel() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [updatingId, setUpdatingId] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -80,7 +95,11 @@ export default function AdminPanel() {
         id,
         order_number,
         status,
-        channel,
+        delivery_method,
+        delivery_address,
+        delivery_reference,
+        payment_method,
+        payment_status,
         total_amount,
         currency,
         created_at,
@@ -110,6 +129,29 @@ export default function AdminPanel() {
     }
 
     setLoading(false);
+  }
+
+  async function updateOrder(orderId, changes) {
+    setUpdatingId(orderId);
+    setError("");
+
+    const { error: updateError } = await supabase.rpc(
+      "admin_update_order_status",
+      {
+        p_order_id: orderId,
+        p_status: changes.status ?? null,
+        p_payment_status: changes.paymentStatus ?? null,
+      }
+    );
+
+    if (updateError) {
+      console.error(updateError);
+      setError("No se pudo actualizar el pedido.");
+    } else {
+      await loadOrders();
+    }
+
+    setUpdatingId(null);
   }
 
   if (loading && !session) {
@@ -257,11 +299,49 @@ export default function AdminPanel() {
 
                 <span>
                   <strong>Fecha:</strong>{" "}
-                  {new Date(order.created_at).toLocaleString(
-                    "es-BO"
-                  )}
+                  {new Date(order.created_at).toLocaleString("es-BO")}
                 </span>
               </div>
+
+              <div className="admin-order-meta">
+                <div>
+                  <strong>Entrega</strong>
+                  <span>
+                    {deliveryLabels[order.delivery_method] || "—"}
+                  </span>
+                </div>
+
+                <div>
+                  <strong>Pago</strong>
+                  <span>
+                    {paymentLabels[order.payment_method] || "—"}
+                  </span>
+                </div>
+
+                <div>
+                  <strong>Estado del pago</strong>
+                  <span>
+                    {order.payment_status === "paid"
+                      ? "Pagado"
+                      : "Pendiente"}
+                  </span>
+                </div>
+              </div>
+
+              {order.delivery_method === "delivery" && (
+                <div className="admin-delivery-address">
+                  <strong>Dirección:</strong>{" "}
+                  {order.delivery_address || "—"}
+
+                  {order.delivery_reference && (
+                    <>
+                      <br />
+                      <strong>Referencia:</strong>{" "}
+                      {order.delivery_reference}
+                    </>
+                  )}
+                </div>
+              )}
 
               <div className="admin-items">
                 {(order.order_items || []).map((item) => (
@@ -284,6 +364,61 @@ export default function AdminPanel() {
                     : `${order.total_amount} Bs`}
                 </strong>
               </div>
+
+              <div className="admin-order-controls">
+                <label>
+                  Estado del pedido
+                  <select
+                    value={order.status}
+                    disabled={updatingId === order.id}
+                    onChange={(event) =>
+                      updateOrder(order.id, {
+                        status: event.target.value,
+                      })
+                    }
+                  >
+                    <option value="confirmed">Confirmado</option>
+                    <option value="preparing">Preparando</option>
+
+                    {order.delivery_method === "pickup" && (
+                      <option value="ready_for_pickup">
+                        Listo para retirar
+                      </option>
+                    )}
+
+                    {order.delivery_method === "delivery" && (
+                      <option value="out_for_delivery">
+                        En camino
+                      </option>
+                    )}
+
+                    <option value="delivered">Entregado</option>
+                    <option value="cancelled">Cancelado</option>
+                  </select>
+                </label>
+
+                <label>
+                  Estado del pago
+                  <select
+                    value={order.payment_status || "pending"}
+                    disabled={updatingId === order.id}
+                    onChange={(event) =>
+                      updateOrder(order.id, {
+                        paymentStatus: event.target.value,
+                      })
+                    }
+                  >
+                    <option value="pending">Pendiente</option>
+                    <option value="paid">Pagado</option>
+                  </select>
+                </label>
+              </div>
+
+              {updatingId === order.id && (
+                <p className="admin-updating">
+                  Actualizando pedido...
+                </p>
+              )}
             </article>
           ))}
         </section>
