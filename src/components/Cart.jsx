@@ -6,6 +6,17 @@ import { formatBolivianos } from "../utils/currency.js";
 import { createOrderMessage, createWhatsAppUrl } from "../utils/whatsapp.js";
 import { saveOrder } from "../lib/orders.js";
 
+const deliveryLabels = {
+  pickup: "Retiro en tienda",
+  delivery: "Envío a domicilio",
+};
+
+const paymentLabels = {
+  qr: "Código QR",
+  cash: "Efectivo",
+  card_in_person: "Tarjeta en persona",
+};
+
 export default function Cart({
   products,
   cart,
@@ -22,31 +33,33 @@ export default function Cart({
     email: "",
   });
 
+  const [delivery, setDelivery] = useState({
+    method: "pickup",
+    address: "",
+    reference: "",
+  });
+
+  const [paymentMethod, setPaymentMethod] = useState("qr");
   const [saving, setSaving] = useState(false);
   const [orderError, setOrderError] = useState("");
 
   const items = cart
     .map((item) => ({
       ...item,
-      product: products.find((product) => product.id === item.productId),
+      product: products.find(
+        (product) => product.id === item.productId
+      ),
       presentation: presentations.find(
-        (presentation) => presentation.id === item.presentationId
+        (presentation) =>
+          presentation.id === item.presentationId
       ),
     }))
     .filter((item) => item.product && item.presentation);
 
   const total = getCartTotal(cart, products);
 
-  const message = createOrderMessage(
-    cart,
-    products,
-    presentations,
-    whatsapp.greeting
-  );
-
-  const orderUrl = cart.length
-    ? createWhatsAppUrl(whatsapp.phone, message)
-    : null;
+  const whatsappConfigured =
+    cart.length > 0 && Boolean(whatsapp.phone);
 
   useEffect(() => {
     const previousFocus = document.activeElement;
@@ -63,19 +76,26 @@ export default function Cart({
 
       if (event.key !== "Tab") return;
 
-      const focusable = cartPanel.current?.querySelectorAll(
-        'a[href], button:not([disabled]), input:not([disabled])'
-      );
+      const focusable =
+        cartPanel.current?.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled])'
+        );
 
       if (!focusable?.length) return;
 
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
 
-      if (event.shiftKey && document.activeElement === first) {
+      if (
+        event.shiftKey &&
+        document.activeElement === first
+      ) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
         event.preventDefault();
         first.focus();
       }
@@ -84,8 +104,13 @@ export default function Cart({
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+
+      document.body.style.overflow =
+        previousOverflow;
 
       if (previousFocus instanceof HTMLElement) {
         previousFocus.focus();
@@ -102,28 +127,100 @@ export default function Cart({
     }));
   }
 
+  function handleDeliveryMethod(method) {
+    setDelivery((current) => ({
+      ...current,
+      method,
+    }));
+
+    if (
+      method === "delivery" &&
+      paymentMethod === "card_in_person"
+    ) {
+      setPaymentMethod("qr");
+    }
+  }
+
+  function handleDeliveryChange(event) {
+    const { name, value } = event.target;
+
+    setDelivery((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
   async function handleCheckout(event) {
     event.preventDefault();
 
-    if (!orderUrl || saving) return;
+    if (!whatsappConfigured || saving) return;
+
+    if (
+      delivery.method === "delivery" &&
+      delivery.address.trim().length < 5
+    ) {
+      setOrderError(
+        "Escribe una dirección válida para el envío."
+      );
+      return;
+    }
 
     setSaving(true);
     setOrderError("");
 
     try {
-      await saveOrder({
+      const savedOrder = await saveOrder({
         customer,
         cart,
         products,
         presentations,
+        delivery,
+        paymentMethod,
       });
+
+      const baseMessage = createOrderMessage(
+        cart,
+        products,
+        presentations,
+        whatsapp.greeting
+      );
+
+      const extraMessage = [
+        "",
+        `Pedido: ${
+          savedOrder?.order_number || "NATIV"
+        }`,
+        `Entrega: ${deliveryLabels[delivery.method]}`,
+        `Pago: ${paymentLabels[paymentMethod]}`,
+        delivery.method === "delivery"
+          ? `Dirección: ${delivery.address.trim()}`
+          : null,
+        delivery.method === "delivery" &&
+        delivery.reference.trim()
+          ? `Referencia: ${delivery.reference.trim()}`
+          : null,
+        "",
+        "El pedido ya fue confirmado en la web. Quisiera coordinar los detalles de entrega y pago.",
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const finalMessage = `${baseMessage}\n${extraMessage}`;
+
+      const orderUrl = createWhatsAppUrl(
+        whatsapp.phone,
+        finalMessage
+      );
 
       window.location.href = orderUrl;
     } catch (error) {
-      console.error("No se pudo registrar el pedido:", error);
+      console.error(
+        "No se pudo registrar el pedido:",
+        error
+      );
 
       setOrderError(
-        "No pudimos registrar tu pedido. Inténtalo nuevamente."
+        "No pudimos confirmar tu pedido. Inténtalo nuevamente."
       );
     } finally {
       setSaving(false);
@@ -138,7 +235,10 @@ export default function Cart({
     >
       <div className="cart-header">
         <div>
-          <p className="eyebrow">Un poquito de nuestra tierra</p>
+          <p className="eyebrow">
+            Un poquito de nuestra tierra
+          </p>
+
           <h2 id="cart-title">Tu pedido</h2>
         </div>
 
@@ -161,7 +261,9 @@ export default function Cart({
 
           <h3>Tu carrito está esperando.</h3>
 
-          <p>Agrega los sabores que quieras descubrir.</p>
+          <p>
+            Agrega los sabores que quieras descubrir.
+          </p>
 
           <button
             type="button"
@@ -192,14 +294,19 @@ export default function Cart({
 
                   <div className="cart-item-copy">
                     <h3>{product.name}</h3>
-                    <span>{presentation.label}</span>
+
+                    <span>
+                      {presentation.label}
+                    </span>
 
                     <span>
                       {Number.isFinite(
                         product.prices[presentationId]
                       )
                         ? formatBolivianos(
-                            product.prices[presentationId]
+                            product.prices[
+                              presentationId
+                            ]
                           )
                         : "Precio por definir"}
                     </span>
@@ -211,7 +318,6 @@ export default function Cart({
                   >
                     <button
                       type="button"
-                      aria-label={`Quitar una unidad de ${product.name}, ${presentation.label}`}
                       onClick={() =>
                         onCartChange(
                           updateCartQuantity(
@@ -226,13 +332,10 @@ export default function Cart({
                       <Minus size={14} />
                     </button>
 
-                    <span aria-live="polite">
-                      {quantity}
-                    </span>
+                    <span>{quantity}</span>
 
                     <button
                       type="button"
-                      aria-label={`Agregar una unidad de ${product.name}, ${presentation.label}`}
                       onClick={() =>
                         onCartChange(
                           updateCartQuantity(
@@ -261,17 +364,14 @@ export default function Cart({
             ) : (
               <>
                 <span>Total</span>
-                <strong>{formatBolivianos(total)}</strong>
+                <strong>
+                  {formatBolivianos(total)}
+                </strong>
               </>
             )}
           </div>
 
-          <p className="cart-disclaimer">
-            Presentaciones, precios y disponibilidad sujetos a
-            confirmación. No se realizan pagos en línea.
-          </p>
-
-          {orderUrl ? (
+          {whatsappConfigured ? (
             <form
               className="cart-customer-form"
               onSubmit={handleCheckout}
@@ -287,7 +387,6 @@ export default function Cart({
                   onChange={handleCustomerChange}
                   required
                   minLength={2}
-                  autoComplete="name"
                   placeholder="Tu nombre"
                 />
               </label>
@@ -301,7 +400,6 @@ export default function Cart({
                   onChange={handleCustomerChange}
                   required
                   minLength={7}
-                  autoComplete="tel"
                   placeholder="Ej. 75415517"
                 />
               </label>
@@ -313,10 +411,173 @@ export default function Cart({
                   name="email"
                   value={customer.email}
                   onChange={handleCustomerChange}
-                  autoComplete="email"
                   placeholder="Opcional"
                 />
               </label>
+
+              <div className="checkout-section">
+                <h3>¿Cómo recibirás tu pedido?</h3>
+
+                <div className="checkout-options">
+                  <label className="checkout-option">
+                    <input
+                      type="radio"
+                      name="deliveryMethod"
+                      checked={
+                        delivery.method === "pickup"
+                      }
+                      onChange={() =>
+                        handleDeliveryMethod("pickup")
+                      }
+                    />
+
+                    <span>
+                      <strong>
+                        Retiro en tienda
+                      </strong>
+                      <small>
+                        Recoge tu pedido directamente
+                        en NATIV.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label className="checkout-option">
+                    <input
+                      type="radio"
+                      name="deliveryMethod"
+                      checked={
+                        delivery.method === "delivery"
+                      }
+                      onChange={() =>
+                        handleDeliveryMethod(
+                          "delivery"
+                        )
+                      }
+                    />
+
+                    <span>
+                      <strong>
+                        Envío a domicilio
+                      </strong>
+                      <small>
+                        Recibe NATIV en la dirección
+                        que indiques.
+                      </small>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {delivery.method === "delivery" && (
+                <div className="delivery-fields">
+                  <label>
+                    Dirección de entrega
+                    <input
+                      type="text"
+                      name="address"
+                      value={delivery.address}
+                      onChange={
+                        handleDeliveryChange
+                      }
+                      required
+                      placeholder="Calle, avenida, número, zona..."
+                    />
+                  </label>
+
+                  <label>
+                    Referencia
+                    <input
+                      type="text"
+                      name="reference"
+                      value={delivery.reference}
+                      onChange={
+                        handleDeliveryChange
+                      }
+                      placeholder="Ej. Portón verde, frente a..."
+                    />
+                  </label>
+                </div>
+              )}
+
+              <div className="checkout-section">
+                <h3>Método de pago</h3>
+
+                <div className="checkout-options">
+                  <label className="checkout-option">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="qr"
+                      checked={
+                        paymentMethod === "qr"
+                      }
+                      onChange={() =>
+                        setPaymentMethod("qr")
+                      }
+                    />
+
+                    <span>
+                      <strong>Código QR</strong>
+                      <small>
+                        Coordina el pago mediante QR.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label className="checkout-option">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cash"
+                      checked={
+                        paymentMethod === "cash"
+                      }
+                      onChange={() =>
+                        setPaymentMethod("cash")
+                      }
+                    />
+
+                    <span>
+                      <strong>Efectivo</strong>
+                      <small>
+                        {delivery.method === "pickup"
+                          ? "Paga al recoger tu pedido."
+                          : "Paga al recibir tu pedido."}
+                      </small>
+                    </span>
+                  </label>
+
+                  {delivery.method === "pickup" && (
+                    <label className="checkout-option">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="card_in_person"
+                        checked={
+                          paymentMethod ===
+                          "card_in_person"
+                        }
+                        onChange={() =>
+                          setPaymentMethod(
+                            "card_in_person"
+                          )
+                        }
+                      />
+
+                      <span>
+                        <strong>
+                          Tarjeta en persona
+                        </strong>
+                        <small>
+                          Paga con tarjeta cuando
+                          recojas tu pedido.
+                        </small>
+                      </span>
+                    </label>
+                  )}
+                </div>
+              </div>
 
               {orderError && (
                 <p
@@ -333,12 +594,19 @@ export default function Cart({
                 disabled={saving}
               >
                 {saving
-                  ? "Registrando pedido..."
-                  : "Continuar por WhatsApp"}
+                  ? "Confirmando compra..."
+                  : "Confirmar compra"}
+
                 {!saving && (
                   <span aria-hidden="true">↗</span>
                 )}
               </button>
+
+              <p className="checkout-note">
+                Después de confirmar, te llevaremos a
+                WhatsApp para coordinar los detalles
+                finales de entrega y pago.
+              </p>
             </form>
           ) : (
             <div
@@ -350,8 +618,8 @@ export default function Cart({
               </strong>
 
               <span>
-                El número oficial de contacto aún no está
-                configurado.
+                El número oficial de contacto aún no
+                está configurado.
               </span>
             </div>
           )}
