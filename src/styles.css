@@ -970,3 +970,88 @@ h1, h2, h3, p { margin-top: 0; }
   margin: 4px auto 0;
   text-decoration: none;
 }
+.admin-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(23, 60, 43, 0.1);
+}
+
+.admin-main-action {
+  min-width: 170px;
+}
+
+.admin-payment-action {
+  border-color: rgba(23, 60, 43, 0.22);
+  background: #eef4ee;
+  color: #173c2b;
+}
+
+.admin-payment-action:hover {
+  background: #e2ece3;
+}
+
+.admin-paid-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #dff0e5;
+  color: #1f643b;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.admin-cancel-action {
+  margin-left: auto;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: #9a3f3f;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-cancel-action:hover {
+  text-decoration: underline;
+}
+
+.admin-quick-actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+@media (max-width: 640px) {
+  .admin-quick-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-main-action,
+  .admin-payment-action,
+  .admin-paid-badge,
+  .admin-cancel-action {
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+    text-align: center;
+  }
+}
+.admin-completed-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #e7efe8;
+  color: #173c2b;
+  font-size: 0.85rem;
+  font-weight: 700;
+}

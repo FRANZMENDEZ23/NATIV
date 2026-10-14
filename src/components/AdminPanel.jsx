@@ -22,6 +22,42 @@ const deliveryLabels = {
   pickup: "Retiro en tienda",
   delivery: "Envío a domicilio",
 };
+function getNextOrderAction(order) {
+  if (order.status === "confirmed") {
+    return {
+      label: "Preparar pedido",
+      status: "preparing",
+    };
+  }
+
+ if (order.status === "preparing") {
+  if (order.delivery_method === "pickup") {
+    return {
+      label: "Marcar como listo para retirar",
+      status: "ready_for_pickup",
+    };
+  }
+
+    if (order.delivery_method === "delivery") {
+      return {
+        label: "Enviar pedido",
+        status: "out_for_delivery",
+      };
+    }
+  }
+
+  if (
+    order.status === "ready_for_pickup" ||
+    order.status === "out_for_delivery"
+  ) {
+    return {
+      label: "Marcar como entregado",
+      status: "delivered",
+    };
+  }
+
+  return null;
+}
 
 export default function AdminPanel() {
   const [session, setSession] = useState(null);
@@ -365,54 +401,73 @@ export default function AdminPanel() {
                 </strong>
               </div>
 
-              <div className="admin-order-controls">
-                <label>
-                  Estado del pedido
-                  <select
-                    value={order.status}
-                    disabled={updatingId === order.id}
-                    onChange={(event) =>
-                      updateOrder(order.id, {
-                        status: event.target.value,
-                      })
-                    }
-                  >
-                    <option value="confirmed">Confirmado</option>
-                    <option value="preparing">Preparando</option>
+              
+                <div className="admin-quick-actions">
+  {getNextOrderAction(order) && (
+    <button
+      type="button"
+      className="button button-dark admin-main-action"
+      disabled={updatingId === order.id}
+      onClick={() => {
+        const nextAction = getNextOrderAction(order);
 
-                    {order.delivery_method === "pickup" && (
-                      <option value="ready_for_pickup">
-                        Listo para retirar
-                      </option>
-                    )}
+        updateOrder(order.id, {
+          status: nextAction.status,
+        });
+      }}
+    >
+      {getNextOrderAction(order).label}
+    </button>
+  )}
 
-                    {order.delivery_method === "delivery" && (
-                      <option value="out_for_delivery">
-                        En camino
-                      </option>
-                    )}
+  {order.payment_status !== "paid" && (
+    <button
+      type="button"
+      className="button admin-payment-action"
+      disabled={updatingId === order.id}
+      onClick={() =>
+        updateOrder(order.id, {
+          paymentStatus: "paid",
+        })
+      }
+    >
+      ✓ Marcar como pagado
+    </button>
+  )}
 
-                    <option value="delivered">Entregado</option>
-                    <option value="cancelled">Cancelado</option>
-                  </select>
-                </label>
+  {order.payment_status === "paid" && (
+    <span className="admin-paid-badge">
+      ✓ Pago recibido
+    </span>
+  )}
+  {order.status === "delivered" && (
+  <span className="admin-completed-badge">
+    ✓ Pedido completado
+  </span>
+)}
 
-                <label>
-                  Estado del pago
-                  <select
-                    value={order.payment_status || "pending"}
-                    disabled={updatingId === order.id}
-                    onChange={(event) =>
-                      updateOrder(order.id, {
-                        paymentStatus: event.target.value,
-                      })
-                    }
-                  >
-                    <option value="pending">Pendiente</option>
-                    <option value="paid">Pagado</option>
-                  </select>
-                </label>
-              </div>
+  {order.status !== "cancelled" &&
+    order.status !== "delivered" && (
+      <button
+        type="button"
+        className="admin-cancel-action"
+        disabled={updatingId === order.id}
+        onClick={() => {
+          const confirmed = window.confirm(
+            "¿Seguro que deseas cancelar este pedido?"
+          );
+
+          if (confirmed) {
+            updateOrder(order.id, {
+              status: "cancelled",
+            });
+          }
+        }}
+      >
+        Cancelar pedido
+      </button>
+    )}
+</div>
 
               {updatingId === order.id && (
                 <p className="admin-updating">
