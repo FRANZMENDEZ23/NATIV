@@ -4,6 +4,14 @@ import { supabase } from "../lib/supabase.js";
 import SurveyAnalytics from "./SurveyAnalytics.jsx";
 
 const statusLabels = {
+  confirmado: "Confirmado",
+  preparando: "Preparando",
+  listo_para_retirar: "Listo para retirar",
+  en_camino: "En camino",
+  entregado: "Entregado",
+  cancelado: "Cancelado",
+  pendiente_whatsapp: "Pendiente en WhatsApp",
+
   confirmed: "Confirmado",
   preparing: "Preparando",
   ready_for_pickup: "Listo para retirar",
@@ -15,21 +23,70 @@ const statusLabels = {
 
 const paymentLabels = {
   qr: "Código QR",
+  efectivo: "Efectivo",
+  tarjeta_en_tienda: "Tarjeta en tienda",
+
   cash: "Efectivo",
-  card_in_person: "Tarjeta en persona",
+  card_in_person: "Tarjeta en tienda",
 };
 
 const deliveryLabels = {
-  pickup: "Retiro en tienda",
+  tienda: "Tienda",
+  domicilio: "Envío a domicilio",
+
+  pickup: "Tienda",
   delivery: "Envío a domicilio",
 };
 function getNextOrderAction(order) {
-  if (order.status === "confirmed") {
+  if (
+    order.status === "confirmed" ||
+    order.status === "confirmado"
+  ) {
     return {
       label: "Preparar pedido",
-      status: "preparing",
+      status: "preparando",
     };
   }
+
+  if (
+    order.status === "preparing" ||
+    order.status === "preparando"
+  ) {
+    if (
+      order.delivery_method === "pickup" ||
+      order.delivery_method === "tienda"
+    ) {
+      return {
+        label: "Marcar como listo para retirar",
+        status: "listo_para_retirar",
+      };
+    }
+
+    if (
+      order.delivery_method === "delivery" ||
+      order.delivery_method === "domicilio"
+    ) {
+      return {
+        label: "Enviar pedido",
+        status: "en_camino",
+      };
+    }
+  
+
+  if (
+    order.status === "ready_for_pickup" ||
+    order.status === "listo_para_retirar" ||
+    order.status === "out_for_delivery" ||
+    order.status === "en_camino"
+  ) {
+    return {
+      label: "Marcar como entregado",
+      status: "entregado",
+    };
+  }
+
+  return null;
+}
 
  if (order.status === "preparing") {
   if (order.delivery_method === "pickup") {
@@ -514,14 +571,17 @@ onClick={() => {
     </button>
   )}
 
-  {order.payment_status !== "paid" && (
+  {(
+  order.payment_status !== "paid" &&
+  order.payment_status !== "pagado"
+) && (
     <button
       type="button"
       className="button admin-payment-action"
       disabled={updatingId === order.id}
       onClick={() =>
         updateOrder(order.id, {
-          paymentStatus: "paid",
+          paymentStatus: "pagado",
         })
       }
     >
@@ -529,7 +589,10 @@ onClick={() => {
     </button>
   )}
 
-  {order.payment_status === "paid" && (
+  {(
+  order.payment_status === "paid" ||
+  order.payment_status === "pagado"
+) && (
     <span className="admin-paid-badge">
       ✓ Pago recibido
     </span>
@@ -540,8 +603,10 @@ onClick={() => {
   </span>
 )}
 
-  {order.status !== "cancelled" &&
-    order.status !== "delivered" && (
+order.status !== "cancelled" &&
+order.status !== "cancelado" &&
+order.status !== "delivered" &&
+order.status !== "entregado"
       <button
         type="button"
         className="admin-cancel-action"
@@ -553,14 +618,14 @@ onClick={() => {
 
           if (confirmed) {
             updateOrder(order.id, {
-              status: "cancelled",
+              status: "cancelado",
             });
           }
         }}
       >
         Cancelar pedido
       </button>
-    )}
+    
 </div>
 
               {updatingId === order.id && (
