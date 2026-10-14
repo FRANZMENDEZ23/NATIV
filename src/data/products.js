@@ -49,7 +49,18 @@ export const products = [
       "1l": "/images/products/chirimoya-1l.png",
       "2l": "/images/products/chirimoya-2l.png",
     },
-    prices: { "200ml": null, "500ml": null, "1l": null, "2l": null },
+    codes: {
+      "200ml": "NAT-CHI-200",
+      "500ml": "NAT-CHI-500",
+      "1l": "NAT-CHI-1L",
+      "2l": "NAT-CHI-2L",
+    },
+    prices: {
+      "200ml": null,
+      "500ml": null,
+      "1l": null,
+      "2l": null,
+    },
   },
   {
     id: "achachairu",
@@ -66,7 +77,18 @@ export const products = [
       "1l": "/images/products/achachairu-1l.png",
       "2l": "/images/products/achachairu-2l.png",
     },
-    prices: { "200ml": null, "500ml": null, "1l": null, "2l": null },
+    codes: {
+      "200ml": "NAT-ACH-200",
+      "500ml": "NAT-ACH-500",
+      "1l": "NAT-ACH-1L",
+      "2l": "NAT-ACH-2L",
+    },
+    prices: {
+      "200ml": null,
+      "500ml": null,
+      "1l": null,
+      "2l": null,
+    },
   },
   {
     id: "maracuya",
@@ -83,7 +105,18 @@ export const products = [
       "1l": "/images/products/guapuru-1l.png",
       "2l": "/images/products/guapuru-2l.png",
     },
-    prices: { "200ml": null, "500ml": null, "1l": null, "2l": null },
+    codes: {
+      "200ml": "NAT-GUA-200",
+      "500ml": "NAT-GUA-500",
+      "1l": "NAT-GUA-1L",
+      "2l": "NAT-GUA-2L",
+    },
+    prices: {
+      "200ml": null,
+      "500ml": null,
+      "1l": null,
+      "2l": null,
+    },
   },
   {
     id: "copoazu",
@@ -100,6 +133,17 @@ export const products = [
       "1l": "/images/products/copoazu-1l.png",
       "2l": "/images/products/copoazu-2l.png",
     },
-    prices: { "200ml": null, "500ml": null, "1l": null, "2l": null },
+    codes: {
+      "200ml": "NAT-COP-200",
+      "500ml": "NAT-COP-500",
+      "1l": "NAT-COP-1L",
+      "2l": "NAT-COP-2L",
+    },
+    prices: {
+      "200ml": null,
+      "500ml": null,
+      "1l": null,
+      "2l": null,
+    },
   },
 ];

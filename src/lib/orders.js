@@ -30,14 +30,15 @@ export async function saveOrder({
 
       if (!product || !presentation) return null;
 
-      return {
-        flavor: product.id === "maracuya" ? "guapuru" : product.id,
-        size: presentation.id,
-        quantity,
-        unit_price: Number.isFinite(product.prices[presentationId])
-          ? product.prices[presentationId]
-          : null,
-      };
+     return {
+  flavor: product.id === "maracuya" ? "guapuru" : product.id,
+  size: presentation.id,
+  quantity,
+  unit_price: Number.isFinite(product.prices[presentationId])
+    ? product.prices[presentationId]
+    : null,
+  product_code: product.codes?.[presentationId] || null,
+};
     })
     .filter(Boolean);
 

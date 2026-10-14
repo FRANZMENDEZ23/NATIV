@@ -144,13 +144,14 @@ export default function AdminPanel() {
           phone,
           email
         ),
-        order_items (
-          id,
-          flavor,
-          size,
-          quantity,
-          unit_price
-        )
+       order_items (
+  id,
+  flavor,
+  size,
+  quantity,
+  unit_price,
+  product_code
+)
       `)
       .order("created_at", { ascending: false });
 
@@ -381,13 +382,17 @@ export default function AdminPanel() {
 
               <div className="admin-items">
                 {(order.order_items || []).map((item) => (
-                  <div className="admin-item" key={item.id}>
-                    <span>
-                      {item.flavor} · {item.size}
-                    </span>
+                 <div className="admin-item" key={item.id}>
+  <span>
+    <strong>
+      {item.product_code || "Sin código"}
+    </strong>
+    <br />
+    {item.flavor} · {item.size}
+  </span>
 
-                    <strong>x{item.quantity}</strong>
-                  </div>
+  <strong>x{item.quantity}</strong>
+</div>
                 ))}
               </div>
 
