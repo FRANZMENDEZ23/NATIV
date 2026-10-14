@@ -46,6 +46,18 @@ export async function saveOrder({
     throw new Error("El pedido no contiene productos.");
   }
 const sessionId = getSessionId();
+const hasMissingPrice = items.some(
+  (item) => !Number.isFinite(Number(item.unit_price)),
+);
+
+const totalAmount = hasMissingPrice
+  ? null
+  : items.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.unit_price) * Number(item.quantity),
+      0,
+    );
   const { data, error } = await supabase.rpc("create_web_order_v3", {
     p_full_name: customer.name.trim(),
     p_phone: customer.phone.trim(),
@@ -53,7 +65,7 @@ const sessionId = getSessionId();
     p_nit: customer.nit?.trim() || null,
     p_session_id: sessionId,
     p_items: items,
-    p_total_amount: null,
+p_total_amount: totalAmount,
     p_delivery_method: delivery.method,
     p_delivery_address:
       delivery.method === "delivery"
