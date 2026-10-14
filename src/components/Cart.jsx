@@ -10,13 +10,11 @@ const deliveryLabels = {
   pickup: "Retiro en tienda",
   delivery: "Envío a domicilio",
 };
-
 const paymentLabels = {
   qr: "Código QR",
   cash: "Efectivo",
   card_in_person: "Tarjeta en persona",
 };
-
 export default function Cart({
   products,
   cart,
@@ -43,6 +41,7 @@ export default function Cart({
   const [paymentMethod, setPaymentMethod] = useState("qr");
   const [saving, setSaving] = useState(false);
   const [orderError, setOrderError] = useState("");
+  const [orderSuccess, setOrderSuccess] = useState("");
 
   const items = cart
     .map((item) => ({
@@ -168,6 +167,7 @@ export default function Cart({
 
     setSaving(true);
     setOrderError("");
+    setOrderSuccess("");
 
     try {
       const savedOrder = await saveOrder({
@@ -206,15 +206,27 @@ export default function Cart({
         .filter(Boolean)
         .join("\n");
 
-      const finalMessage = `${baseMessage}\n${extraMessage}`;
+     const finalMessage = `${baseMessage}\n${extraMessage}`;
 
-      const orderUrl = createWhatsAppUrl(
-        whatsapp.phone,
-        finalMessage
-      );
+if (delivery.method === "delivery") {
+  // onCartChange([]);
 
-      window.location.href = orderUrl;
-    } catch (error) {
+  const orderUrl = createWhatsAppUrl(
+    whatsapp.phone,
+    finalMessage
+  );
+
+  window.location.href = orderUrl;
+} else {
+  setOrderSuccess(
+    `Pedido ${
+      savedOrder?.order_number || ""
+    } confirmado correctamente. Revisa tu correo para ver los detalles de tu pedido.`
+  );
+
+  onCartChange([]);
+}
+} catch (error) {
       console.error(
         "No se pudo registrar el pedido:",
         error
@@ -622,7 +634,14 @@ export default function Cart({
                   {orderError}
                 </p>
               )}
-
+{orderSuccess && (
+  <p
+    className="cart-order-success"
+    role="status"
+  >
+    {orderSuccess}
+  </p>
+)}
               <button
                 className="button button-dark cart-submit"
                 type="submit"
