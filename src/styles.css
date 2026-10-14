@@ -1584,3 +1584,32 @@ h1, h2, h3, p { margin-top: 0; }
     padding: 11px 10px;
   }
 }
+.admin-item-info {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-item-info span {
+  color: #314a3b;
+}
+
+.admin-item-info small {
+  color: #6d786f;
+  font-size: 13px;
+}
+
+.admin-item-summary {
+  display: grid;
+  gap: 5px;
+  text-align: right;
+}
+
+.admin-item-summary strong {
+  color: #173c2b;
+}
+
+.admin-item-summary span {
+  color: #52694e;
+  font-size: 14px;
+  font-weight: 700;
+}

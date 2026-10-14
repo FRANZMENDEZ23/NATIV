@@ -454,16 +454,33 @@ onClick={() => {
 
               <div className="admin-items">
                 {(order.order_items || []).map((item) => (
-                 <div className="admin-item" key={item.id}>
-  <span>
+                 
+  <div className="admin-item" key={item.id}>
+  <div className="admin-item-info">
     <strong>
       {item.product_code || "Sin código"}
     </strong>
-    <br />
-    {item.flavor} · {item.size}
-  </span>
 
-  <strong>x{item.quantity}</strong>
+    <span>
+      {item.flavor} · {item.size}
+    </span>
+
+    <small>
+      {item.unit_price == null
+        ? "Precio no disponible"
+        : `${item.unit_price} Bs c/u`}
+    </small>
+  </div>
+
+  <div className="admin-item-summary">
+    <strong>x{item.quantity}</strong>
+
+    <span>
+      {item.unit_price == null
+        ? "—"
+        : `${Number(item.unit_price) * item.quantity} Bs`}
+    </span>
+  </div>
 </div>
                 ))}
               </div>
