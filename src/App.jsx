@@ -14,6 +14,8 @@ import Testimonials from "./components/Testimonials.jsx";
 import Contact from "./components/Contact.jsx";
 import Footer from "./components/Footer.jsx";
 import Cart from "./components/Cart.jsx";
+import SurveyModal from "./components/SurveyModal.jsx";
+import { saveSurveyResponse } from "./lib/survey.js";
 
 export default function App() {
   const [initialCart] = useState(() =>
@@ -22,6 +24,9 @@ export default function App() {
   const [cart, setCart] = useState(initialCart.cart);
   const [cartOpen, setCartOpen] = useState(false);
   const [notice, setNotice] = useState(initialCart.error || "");
+  const [surveyOpen, setSurveyOpen] = useState(() => {
+  return window.localStorage.getItem("nativ_survey_completed") !== "true";
+});
   const closeCart = useCallback(() => setCartOpen(false), []);
 
   useEffect(() => {
@@ -38,9 +43,28 @@ export default function App() {
     setNotice(`Pedido actualizado: ${product.name} · ${presentation?.label ?? ""} × ${quantity}`);
     window.setTimeout(() => setNotice(""), 2600);
   }
+  async function handleSurveySubmit(form) {
+  await saveSurveyResponse(form);
+
+  window.localStorage.setItem("nativ_survey_completed", "true");
+  setSurveyOpen(false);
+
+  setNotice("Gracias por ayudarnos a conocer tus preferencias.");
+  window.setTimeout(() => setNotice(""), 3000);
+}
+
+function handleSurveyClose() {
+  setSurveyOpen(false);
+}
 
   return (
     <>
+    {surveyOpen && (
+  <SurveyModal
+    onClose={handleSurveyClose}
+    onSubmit={handleSurveySubmit}
+  />
+)}
       <a className="skip-link" href="#contenido">Saltar al contenido</a>
       <Navbar cartCount={getCartCount(cart)} onCartClick={() => setCartOpen(true)} />
       <main id="contenido">

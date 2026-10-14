@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LogOut, RefreshCw } from "lucide-react";
 import { supabase } from "../lib/supabase.js";
+import SurveyAnalytics from "./SurveyAnalytics.jsx";
 
 const statusLabels = {
   confirmed: "Confirmado",
@@ -64,10 +65,13 @@ export default function AdminPanel() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [orders, setOrders] = useState([]);
+  const [surveyResponses, setSurveyResponses] = useState([]);
+const [surveyLoading, setSurveyLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("orders");
 
   useEffect(() => {
     let mounted = true;
@@ -91,12 +95,14 @@ export default function AdminPanel() {
   }, []);
 
   useEffect(() => {
-    if (session) {
-      loadOrders();
-    } else {
-      setOrders([]);
-    }
-  }, [session]);
+  if (session) {
+    loadOrders();
+    loadSurveyResponses();
+  } else {
+    setOrders([]);
+    setSurveyResponses([]);
+  }
+}, [session]);
 
   async function handleLogin(event) {
     event.preventDefault();
@@ -168,7 +174,32 @@ export default function AdminPanel() {
 
     setLoading(false);
   }
+async function loadSurveyResponses() {
+  setSurveyLoading(true);
 
+  const { data, error: surveyError } = await supabase
+    .from("customer_preference_surveys")
+    .select(`
+      id,
+      gender,
+      preferred_flavor,
+      preferred_size,
+      purchase_priority,
+      delivery_preference,
+      purchase_frequency,
+      created_at
+    `)
+    .order("created_at", { ascending: false });
+
+  if (surveyError) {
+    console.error("Error cargando encuesta:", surveyError);
+    setSurveyResponses([]);
+  } else {
+    setSurveyResponses(data || []);
+  }
+
+  setSurveyLoading(false);
+}
   async function updateOrder(orderId, changes) {
     setUpdatingId(orderId);
     setError("");
@@ -266,14 +297,17 @@ export default function AdminPanel() {
 
         <div className="admin-actions">
           <button
-            type="button"
-            className="button"
-            onClick={loadOrders}
-            disabled={loading}
-          >
-            <RefreshCw size={16} />
-            Actualizar
-          </button>
+  type="button"
+  className="button"
+  onClick={() => {
+    loadOrders();
+    loadSurveyResponses();
+  }}
+  disabled={loading || surveyLoading}
+>
+  <RefreshCw size={16} />
+  Actualizar
+</button>
 
           <button
             type="button"
@@ -286,13 +320,45 @@ export default function AdminPanel() {
         </div>
       </header>
 
-      {error && (
+<div className="admin-tabs">
+  <button
+    type="button"
+    className={`admin-tab ${
+      activeTab === "orders" ? "active" : ""
+    }`}
+    onClick={() => setActiveTab("orders")}
+  >
+    Pedidos
+  </button>
+
+  <button
+    type="button"
+    className={`admin-tab ${
+      activeTab === "survey" ? "active" : ""
+    }`}
+onClick={() => {
+  setActiveTab("survey");
+  loadSurveyResponses();
+}}  >
+    Encuesta NATIV
+  </button>
+</div>
+
+{error && (
         <p className="admin-error" role="alert">
           {error}
         </p>
       )}
+{activeTab === "survey" && (
+  <SurveyAnalytics
+    responses={surveyResponses}
+    loading={surveyLoading}
+  />
+)}
 
-      {loading ? (
+{activeTab === "orders" && (
+  <>
+    {loading ? (
         <p>Cargando pedidos...</p>
       ) : orders.length === 0 ? (
         <section className="admin-empty">
@@ -488,7 +554,9 @@ export default function AdminPanel() {
             </article>
           ))}
         </section>
-      )}
+            )}
+  </>
+)}
     </main>
   );
 }
