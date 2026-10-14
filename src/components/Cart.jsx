@@ -578,6 +578,30 @@ export default function Cart({
                   )}
                 </div>
               </div>
+              {paymentMethod === "qr" && (
+  <div className="qr-payment-box">
+    <h3>Paga mediante QR</h3>
+
+    <p>
+      Escanea este código con tu aplicación bancaria o Yape.
+      Después de realizar el pago, confirma tu compra.
+    </p>
+
+    <img
+  src="/images/payments/nativ-qr.jpeg"
+  alt="Código QR de pago NATIV"
+  className="qr-payment-image"
+/>
+
+<a
+  href="/images/payments/nativ-qr.jpeg"
+  download="QR-NATIV.jpeg"
+  className="button qr-download-button"
+>
+  Descargar QR
+</a>
+ </div>
+)}
 
               {orderError && (
                 <p

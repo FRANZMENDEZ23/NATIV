@@ -935,3 +935,38 @@ h1, h2, h3, p { margin-top: 0; }
     grid-template-columns: 1fr;
   }
 }
+.qr-payment-box {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 18px;
+  border: 1px solid rgba(31, 63, 45, 0.14);
+  border-radius: 16px;
+  background: #fffdf7;
+  text-align: center;
+}
+
+.qr-payment-box h3 {
+  margin: 0;
+  color: #1f3f2d;
+}
+
+.qr-payment-box p {
+  margin: 0;
+  color: #718078;
+  line-height: 1.5;
+}
+
+.qr-payment-image {
+  display: block;
+  width: min(100%, 260px);
+  height: auto;
+  margin: 4px auto 0;
+  border-radius: 14px;
+}
+
+.qr-download-button {
+  width: fit-content;
+  margin: 4px auto 0;
+  text-decoration: none;
+}
