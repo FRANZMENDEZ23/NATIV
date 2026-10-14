@@ -428,7 +428,7 @@ h1, h2, h3, p { margin-top: 0; }
 .vessel-bottle { width: 18px; height: 27px; }
 .vessel-bottle-large { width: 21px; height: 33px; }
 .vessel-jug { width: 25px; height: 31px; border-radius: 4px 7px 5px 5px; }
-.selected-price { margin: 11px 0 0; color: #52694e; font-size: 10px; font-weight: 600; }
+.selected-price { margin: 12px 0 0; color: #173c2b; font-size: 15px; font-weight: 700; }
 .configurator-step:nth-child(3) { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .configurator-quantity { display: flex; align-items: center; gap: 17px; }
 .configurator-quantity button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }

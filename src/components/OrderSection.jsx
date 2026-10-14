@@ -179,8 +179,7 @@ export default function OrderSection({ products, presentations, onAdd }) {
             </div>
           </div>
         </div>
-        <p className="configurator-note">Sin pagos en línea. Confirmamos disponibilidad y entrega personalmente.</p>
-      </div>
+              </div>
     </section>
   );
 }
