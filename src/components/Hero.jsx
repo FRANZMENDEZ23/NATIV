@@ -29,7 +29,7 @@ export default function Hero() {
         <p className="hero-package-sizes">200 ml <span>·</span> 500 ml <span>·</span> 1 L <span>·</span> 2 L</p>
         <div className="hero-fruit-caption">
           <strong>Sabores que son de aquí</strong>
-          <span>Chirimoya <i>·</i> Achachairú <i>·</i> Maracuyá <i>·</i> Copoazú</span>
+          <span>Chirimoya <i>·</i> Achachairú <i>·</i> Guapurú <i>·</i> Copoazú</span>
         </div>
         <div className="hero-scroll"><ArrowDownRight size={14} aria-hidden="true" /><span>DESCUBRE</span></div>
       </div>

@@ -10,12 +10,12 @@ import Process from "./components/Process.jsx";
 import Benefits from "./components/Benefits.jsx";
 import FeaturedProduct from "./components/FeaturedProduct.jsx";
 import OrderSection from "./components/OrderSection.jsx";
-import Testimonials from "./components/Testimonials.jsx";
 import Contact from "./components/Contact.jsx";
 import Footer from "./components/Footer.jsx";
 import Cart from "./components/Cart.jsx";
 import SurveyModal from "./components/SurveyModal.jsx";
 import { saveSurveyResponse } from "./lib/survey.js";
+import Location from "./components/Location.jsx";
 
 export default function App() {
   const [initialCart] = useState(() =>
@@ -75,8 +75,9 @@ function handleSurveyClose() {
         <Benefits />
         <FeaturedProduct />
         <OrderSection products={products} presentations={presentations} onAdd={handleAdd} />
-        <Testimonials />
-        <Contact config={business} />
+      
+<Location />
+<Contact config={business} />
       </main>
       <Footer config={business} />
       {notice && <div className="toast" role="status" aria-live="polite">{notice}</div>}
