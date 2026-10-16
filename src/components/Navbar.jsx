@@ -5,6 +5,7 @@ const links = [
   ["Sabores", "#sabores"],
   ["Nuestra historia", "#historia"],
   ["Así lo hacemos", "#proceso"],
+  ["Cómo llegar", "#ubicacion"],
   ["Pedidos", "#pedidos"],
 ];
 
