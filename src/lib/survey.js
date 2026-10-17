@@ -1,18 +1,18 @@
 import { supabase } from "./supabase.js";
 
 export async function saveSurveyResponse(form) {
-  const { data, error } = await supabase
+  const survey = {
+    gender: form.gender,
+    preferred_flavor: form.preferredFlavor,
+    preferred_size: form.preferredSize,
+    purchase_priority: form.purchasePriority,
+    delivery_preference: form.deliveryPreference,
+    purchase_frequency: form.purchaseFrequency,
+  };
+
+  const { error } = await supabase
     .from("customer_preference_surveys")
-    .insert({
-      gender: form.gender,
-      preferred_flavor: form.preferredFlavor,
-      preferred_size: form.preferredSize,
-      purchase_priority: form.purchasePriority,
-      delivery_preference: form.deliveryPreference,
-      purchase_frequency: form.purchaseFrequency,
-    })
-    .select()
-    .single();
+    .insert(survey);
 
   if (error) {
     throw error;
@@ -22,7 +22,10 @@ export async function saveSurveyResponse(form) {
     "send-survey-to-sheet",
     {
       body: {
-        survey: data,
+        survey: {
+          ...survey,
+          created_at: new Date().toISOString(),
+        },
       },
     }
   );
@@ -33,6 +36,4 @@ export async function saveSurveyResponse(form) {
       sheetError
     );
   }
-
-  return data;
 }
