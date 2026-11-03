@@ -1,20 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { presentations } from "../data/products.js";
-import { getCartTotal, updateCartQuantity } from "../utils/cart.js";
+import {
+  getCartTotal,
+  updateCartQuantity,
+} from "../utils/cart.js";
 import { formatBolivianos } from "../utils/currency.js";
-import { createOrderMessage, createWhatsAppUrl } from "../utils/whatsapp.js";
+import {
+  createOrderMessage,
+  createWhatsAppUrl,
+} from "../utils/whatsapp.js";
 import { saveOrder } from "../lib/orders.js";
 
 const deliveryLabels = {
   pickup: "Retiro en tienda",
   delivery: "Envío a domicilio",
 };
+
 const paymentLabels = {
   qr: "Código QR",
   cash: "Efectivo",
   card_in_person: "Tarjeta en persona",
 };
+
 export default function Cart({
   products,
   cart,
@@ -26,11 +34,11 @@ export default function Cart({
   const cartPanel = useRef(null);
 
   const [customer, setCustomer] = useState({
-  name: "",
-  phone: "",
-  email: "",
-  nit: "",
-});
+    name: "",
+    phone: "",
+    email: "",
+    nit: "",
+  });
 
   const [delivery, setDelivery] = useState({
     method: "pickup",
@@ -38,10 +46,13 @@ export default function Cart({
     reference: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("qr");
+  const [paymentMethod, setPaymentMethod] =
+    useState("qr");
+
   const [saving, setSaving] = useState(false);
   const [orderError, setOrderError] = useState("");
-  const [orderSuccess, setOrderSuccess] = useState("");
+  const [orderSuccess, setOrderSuccess] =
+    useState("");
 
   const items = cart
     .map((item) => ({
@@ -54,7 +65,9 @@ export default function Cart({
           presentation.id === item.presentationId
       ),
     }))
-    .filter((item) => item.product && item.presentation);
+    .filter(
+      (item) => item.product && item.presentation
+    );
 
   const total = getCartTotal(cart, products);
 
@@ -63,7 +76,8 @@ export default function Cart({
 
   useEffect(() => {
     const previousFocus = document.activeElement;
-    const previousOverflow = document.body.style.overflow;
+    const previousOverflow =
+      document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
     closeButton.current?.focus();
@@ -84,7 +98,8 @@ export default function Cart({
       if (!focusable?.length) return;
 
       const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+      const last =
+        focusable[focusable.length - 1];
 
       if (
         event.shiftKey &&
@@ -101,7 +116,10 @@ export default function Cart({
       }
     }
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
 
     return () => {
       document.removeEventListener(
@@ -112,7 +130,9 @@ export default function Cart({
       document.body.style.overflow =
         previousOverflow;
 
-      if (previousFocus instanceof HTMLElement) {
+      if (
+        previousFocus instanceof HTMLElement
+      ) {
         previousFocus.focus();
       }
     };
@@ -125,6 +145,8 @@ export default function Cart({
       ...current,
       [name]: value,
     }));
+
+    setOrderError("");
   }
 
   function handleDeliveryMethod(method) {
@@ -139,6 +161,8 @@ export default function Cart({
     ) {
       setPaymentMethod("qr");
     }
+
+    setOrderError("");
   }
 
   function handleDeliveryChange(event) {
@@ -148,12 +172,37 @@ export default function Cart({
       ...current,
       [name]: value,
     }));
+
+    setOrderError("");
   }
 
   async function handleCheckout(event) {
     event.preventDefault();
 
-    if (!whatsappConfigured || saving) return;
+    // Honeypot anti-spam.
+    // Una persona normal nunca ve ni llena este campo.
+    const formData = new FormData(
+      event.currentTarget
+    );
+
+    const website = String(
+      formData.get("website") || ""
+    ).trim();
+
+    if (website) {
+      return;
+    }
+
+    if (!whatsappConfigured || saving) {
+      return;
+    }
+
+    if (!customer.email.trim()) {
+      setOrderError(
+        "Escribe tu correo electrónico para recibir la confirmación del pedido."
+      );
+      return;
+    }
 
     if (
       delivery.method === "delivery" &&
@@ -179,20 +228,25 @@ export default function Cart({
         paymentMethod,
       });
 
-      const baseMessage = createOrderMessage(
-        cart,
-        products,
-        presentations,
-        whatsapp.greeting
-      );
+      const baseMessage =
+        createOrderMessage(
+          cart,
+          products,
+          presentations,
+          whatsapp.greeting
+        );
 
       const extraMessage = [
         "",
         `Pedido: ${
           savedOrder?.order_number || "NATIV"
         }`,
-        `Entrega: ${deliveryLabels[delivery.method]}`,
-        `Pago: ${paymentLabels[paymentMethod]}`,
+        `Entrega: ${
+          deliveryLabels[delivery.method]
+        }`,
+        `Pago: ${
+          paymentLabels[paymentMethod]
+        }`,
         delivery.method === "delivery"
           ? `Dirección: ${delivery.address.trim()}`
           : null,
@@ -206,27 +260,33 @@ export default function Cart({
         .filter(Boolean)
         .join("\n");
 
-     const finalMessage = `${baseMessage}\n${extraMessage}`;
+      const finalMessage =
+        `${baseMessage}\n${extraMessage}`;
 
-if (delivery.method === "delivery") {
-  // onCartChange([]);
+      setOrderSuccess(
+        `Pedido ${
+          savedOrder?.order_number || ""
+        } confirmado correctamente. Revisa tu correo para ver los detalles de tu pedido.`
+      );
 
-  const orderUrl = createWhatsAppUrl(
-    whatsapp.phone,
-    finalMessage
-  );
+      // Vacía el carrito, pero el mensaje de éxito
+      // seguirá visible.
+      onCartChange([]);
 
-  window.location.href = orderUrl;
-} else {
-  setOrderSuccess(
-    `Pedido ${
-      savedOrder?.order_number || ""
-    } confirmado correctamente. Revisa tu correo para ver los detalles de tu pedido.`
-  );
+      if (delivery.method === "delivery") {
+        const orderUrl =
+          createWhatsAppUrl(
+            whatsapp.phone,
+            finalMessage
+          );
 
-  onCartChange([]);
-}
-} catch (error) {
+        // Dejamos visible el éxito unos segundos
+        // antes de abrir WhatsApp.
+        setTimeout(() => {
+          window.location.href = orderUrl;
+        }, 3000);
+      }
+    } catch (error) {
       console.error(
         "No se pudo registrar el pedido:",
         error
@@ -252,7 +312,9 @@ if (delivery.method === "delivery") {
             Un poquito de nuestra tierra
           </p>
 
-          <h2 id="cart-title">Tu pedido</h2>
+          <h2 id="cart-title">
+            Tu pedido
+          </h2>
         </div>
 
         <button
@@ -267,25 +329,63 @@ if (delivery.method === "delivery") {
       </div>
 
       {items.length === 0 ? (
-        <div className="cart-empty">
-          <span className="cart-empty-icon">
-            <ShoppingBag size={24} />
-          </span>
-
-          <h3>Tu carrito está esperando.</h3>
-
-          <p>
-            Agrega los sabores que quieras descubrir.
-          </p>
-
-          <button
-            type="button"
-            className="button button-dark"
-            onClick={onClose}
+        orderSuccess ? (
+          <div
+            className="cart-empty cart-success-screen"
+            role="status"
           >
-            Explorar sabores
-          </button>
-        </div>
+            <span className="cart-empty-icon">
+              ✓
+            </span>
+
+            <h3>
+              ¡Pedido confirmado!
+            </h3>
+
+            <p>{orderSuccess}</p>
+
+            {delivery.method ===
+            "delivery" ? (
+              <p>
+                En unos segundos te
+                llevaremos a WhatsApp para
+                coordinar la entrega y el
+                pago.
+              </p>
+            ) : (
+              <button
+                type="button"
+                className="button button-dark"
+                onClick={onClose}
+              >
+                Aceptar
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="cart-empty">
+            <span className="cart-empty-icon">
+              <ShoppingBag size={24} />
+            </span>
+
+            <h3>
+              Tu carrito está esperando.
+            </h3>
+
+            <p>
+              Agrega los sabores que quieras
+              descubrir.
+            </p>
+
+            <button
+              type="button"
+              className="button button-dark"
+              onClick={onClose}
+            >
+              Explorar sabores
+            </button>
+          </div>
+        )
       ) : (
         <>
           <div className="cart-items">
@@ -306,7 +406,9 @@ if (delivery.method === "delivery") {
                   />
 
                   <div className="cart-item-copy">
-                    <h3>{product.name}</h3>
+                    <h3>
+                      {product.name}
+                    </h3>
 
                     <span>
                       {presentation.label}
@@ -314,7 +416,9 @@ if (delivery.method === "delivery") {
 
                     <span>
                       {Number.isFinite(
-                        product.prices[presentationId]
+                        product.prices[
+                          presentationId
+                        ]
                       )
                         ? formatBolivianos(
                             product.prices[
@@ -345,7 +449,9 @@ if (delivery.method === "delivery") {
                       <Minus size={14} />
                     </button>
 
-                    <span>{quantity}</span>
+                    <span>
+                      {quantity}
+                    </span>
 
                     <button
                       type="button"
@@ -372,13 +478,17 @@ if (delivery.method === "delivery") {
             {total === null ? (
               <>
                 <span>Total</span>
-                <strong>Por definir</strong>
+                <strong>
+                  Por definir
+                </strong>
               </>
             ) : (
               <>
                 <span>Total</span>
                 <strong>
-                  {formatBolivianos(total)}
+                  {formatBolivianos(
+                    total
+                  )}
                 </strong>
               </>
             )}
@@ -389,15 +499,30 @@ if (delivery.method === "delivery") {
               className="cart-customer-form"
               onSubmit={handleCheckout}
             >
-              <h3>Datos para tu pedido</h3>
+              {/* Honeypot anti-spam */}
+              <input
+                type="text"
+                name="website"
+                tabIndex="-1"
+                autoComplete="off"
+                aria-hidden="true"
+                className="honeypot-field"
+              />
+
+              <h3>
+                Datos para tu pedido
+              </h3>
 
               <label>
                 Nombre
+
                 <input
                   type="text"
                   name="name"
                   value={customer.name}
-                  onChange={handleCustomerChange}
+                  onChange={
+                    handleCustomerChange
+                  }
                   required
                   minLength={2}
                   placeholder="Tu nombre"
@@ -406,11 +531,14 @@ if (delivery.method === "delivery") {
 
               <label>
                 WhatsApp
+
                 <input
                   type="tel"
                   name="phone"
                   value={customer.phone}
-                  onChange={handleCustomerChange}
+                  onChange={
+                    handleCustomerChange
+                  }
                   required
                   minLength={7}
                   placeholder="Ej. 75415517"
@@ -419,27 +547,42 @@ if (delivery.method === "delivery") {
 
               <label>
                 Correo electrónico
+
                 <input
                   type="email"
                   name="email"
                   value={customer.email}
-                  onChange={handleCustomerChange}
+                  onChange={
+                    handleCustomerChange
+                  }
+                  required
+                  placeholder="tu@correo.com"
+                />
+
+                <small>
+                  Te enviaremos aquí la
+                  confirmación de tu pedido.
+                </small>
+              </label>
+
+              <label>
+                NIT
+
+                <input
+                  type="text"
+                  name="nit"
+                  value={customer.nit}
+                  onChange={
+                    handleCustomerChange
+                  }
                   placeholder="Opcional"
                 />
               </label>
-              <label>
-  NIT
-  <input
-    type="text"
-    name="nit"
-    value={customer.nit}
-    onChange={handleCustomerChange}
-    placeholder="Opcional"
-  />
-</label>
 
               <div className="checkout-section">
-                <h3>¿Cómo recibirás tu pedido?</h3>
+                <h3>
+                  ¿Cómo recibirás tu pedido?
+                </h3>
 
                 <div className="checkout-options">
                   <label className="checkout-option">
@@ -447,10 +590,13 @@ if (delivery.method === "delivery") {
                       type="radio"
                       name="deliveryMethod"
                       checked={
-                        delivery.method === "pickup"
+                        delivery.method ===
+                        "pickup"
                       }
                       onChange={() =>
-                        handleDeliveryMethod("pickup")
+                        handleDeliveryMethod(
+                          "pickup"
+                        )
                       }
                     />
 
@@ -458,9 +604,10 @@ if (delivery.method === "delivery") {
                       <strong>
                         Retiro en tienda
                       </strong>
+
                       <small>
-                        Recoge tu pedido directamente
-                        en NATIV.
+                        Recoge tu pedido
+                        directamente en NATIV.
                       </small>
                     </span>
                   </label>
@@ -470,7 +617,8 @@ if (delivery.method === "delivery") {
                       type="radio"
                       name="deliveryMethod"
                       checked={
-                        delivery.method === "delivery"
+                        delivery.method ===
+                        "delivery"
                       }
                       onChange={() =>
                         handleDeliveryMethod(
@@ -483,23 +631,28 @@ if (delivery.method === "delivery") {
                       <strong>
                         Envío a domicilio
                       </strong>
+
                       <small>
-                        Recibe NATIV en la dirección
-                        que indiques.
+                        Recibe NATIV en la
+                        dirección que indiques.
                       </small>
                     </span>
                   </label>
                 </div>
               </div>
 
-              {delivery.method === "delivery" && (
+              {delivery.method ===
+                "delivery" && (
                 <div className="delivery-fields">
                   <label>
                     Dirección de entrega
+
                     <input
                       type="text"
                       name="address"
-                      value={delivery.address}
+                      value={
+                        delivery.address
+                      }
                       onChange={
                         handleDeliveryChange
                       }
@@ -510,10 +663,13 @@ if (delivery.method === "delivery") {
 
                   <label>
                     Referencia
+
                     <input
                       type="text"
                       name="reference"
-                      value={delivery.reference}
+                      value={
+                        delivery.reference
+                      }
                       onChange={
                         handleDeliveryChange
                       }
@@ -524,7 +680,9 @@ if (delivery.method === "delivery") {
               )}
 
               <div className="checkout-section">
-                <h3>Método de pago</h3>
+                <h3>
+                  Método de pago
+                </h3>
 
                 <div className="checkout-options">
                   <label className="checkout-option">
@@ -536,14 +694,20 @@ if (delivery.method === "delivery") {
                         paymentMethod === "qr"
                       }
                       onChange={() =>
-                        setPaymentMethod("qr")
+                        setPaymentMethod(
+                          "qr"
+                        )
                       }
                     />
 
                     <span>
-                      <strong>Código QR</strong>
+                      <strong>
+                        Código QR
+                      </strong>
+
                       <small>
-                        Coordina el pago mediante QR.
+                        Coordina el pago
+                        mediante QR.
                       </small>
                     </span>
                   </label>
@@ -554,24 +718,32 @@ if (delivery.method === "delivery") {
                       name="paymentMethod"
                       value="cash"
                       checked={
-                        paymentMethod === "cash"
+                        paymentMethod ===
+                        "cash"
                       }
                       onChange={() =>
-                        setPaymentMethod("cash")
+                        setPaymentMethod(
+                          "cash"
+                        )
                       }
                     />
 
                     <span>
-                      <strong>Efectivo</strong>
+                      <strong>
+                        Efectivo
+                      </strong>
+
                       <small>
-                        {delivery.method === "pickup"
+                        {delivery.method ===
+                        "pickup"
                           ? "Paga al recoger tu pedido."
                           : "Paga al recibir tu pedido."}
                       </small>
                     </span>
                   </label>
 
-                  {delivery.method === "pickup" && (
+                  {delivery.method ===
+                    "pickup" && (
                     <label className="checkout-option">
                       <input
                         type="radio"
@@ -592,39 +764,46 @@ if (delivery.method === "delivery") {
                         <strong>
                           Tarjeta en persona
                         </strong>
+
                         <small>
-                          Paga con tarjeta cuando
-                          recojas tu pedido.
+                          Paga con tarjeta
+                          cuando recojas tu
+                          pedido.
                         </small>
                       </span>
                     </label>
                   )}
                 </div>
               </div>
+
               {paymentMethod === "qr" && (
-  <div className="qr-payment-box">
-    <h3>Paga mediante QR</h3>
+                <div className="qr-payment-box">
+                  <h3>
+                    Paga mediante QR
+                  </h3>
 
-    <p>
-      Escanea este código con tu aplicación bancaria o Yape.
-      Después de realizar el pago, confirma tu compra.
-    </p>
+                  <p>
+                    Escanea este código con tu
+                    aplicación bancaria o Yape.
+                    Después de realizar el pago,
+                    confirma tu compra.
+                  </p>
 
-    <img
-  src="/images/payments/nativ-qr.jpeg"
-  alt="Código QR de pago NATIV"
-  className="qr-payment-image"
-/>
+                  <img
+                    src="/images/payments/nativ-qr.jpeg"
+                    alt="Código QR de pago NATIV"
+                    className="qr-payment-image"
+                  />
 
-<a
-  href="/images/payments/nativ-qr.jpeg"
-  download="QR-NATIV.jpeg"
-  className="button qr-download-button"
->
-  Descargar QR
-</a>
- </div>
-)}
+                  <a
+                    href="/images/payments/nativ-qr.jpeg"
+                    download="QR-NATIV.jpeg"
+                    className="button qr-download-button"
+                  >
+                    Descargar QR
+                  </a>
+                </div>
+              )}
 
               {orderError && (
                 <p
@@ -634,14 +813,16 @@ if (delivery.method === "delivery") {
                   {orderError}
                 </p>
               )}
-{orderSuccess && (
-  <p
-    className="cart-order-success"
-    role="status"
-  >
-    {orderSuccess}
-  </p>
-)}
+
+              {orderSuccess && (
+                <p
+                  className="cart-order-success"
+                  role="status"
+                >
+                  {orderSuccess}
+                </p>
+              )}
+
               <button
                 className="button button-dark cart-submit"
                 type="submit"
@@ -652,14 +833,19 @@ if (delivery.method === "delivery") {
                   : "Confirmar compra"}
 
                 {!saving && (
-                  <span aria-hidden="true">↗</span>
+                  <span aria-hidden="true">
+                    ↗
+                  </span>
                 )}
               </button>
 
               <p className="checkout-note">
-                Después de confirmar, te llevaremos a
-                WhatsApp para coordinar los detalles
-                finales de entrega y pago.
+                Al confirmar tu compra recibirás
+                un correo con los datos del
+                pedido.
+                {delivery.method ===
+                  "delivery" &&
+                  " Después te llevaremos a WhatsApp para coordinar la entrega y el pago."}
               </p>
             </form>
           ) : (
@@ -668,12 +854,13 @@ if (delivery.method === "delivery") {
               role="status"
             >
               <strong>
-                Pedidos por WhatsApp próximamente
+                Pedidos por WhatsApp
+                próximamente
               </strong>
 
               <span>
-                El número oficial de contacto aún no
-                está configurado.
+                El número oficial de contacto
+                aún no está configurado.
               </span>
             </div>
           )}

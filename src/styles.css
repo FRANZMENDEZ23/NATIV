@@ -1778,3 +1778,19 @@ h1, h2, h3, p { margin-top: 0; }
   font-weight: 600;
   letter-spacing: 0.03em;
 }
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
