@@ -1794,3 +1794,27 @@ h1, h2, h3, p { margin-top: 0; }
   opacity: 0;
   pointer-events: none;
 }
+.checkout-privacy {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(23, 60, 43, 0.15);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.checkout-privacy strong {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.checkout-privacy p {
+  margin: 0 0 0.5rem;
+}
+
+.checkout-privacy small {
+  display: block;
+  margin-top: 0.5rem;
+  opacity: 0.75;
+}

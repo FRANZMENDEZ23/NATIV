@@ -822,7 +822,30 @@ export default function Cart({
                   {orderSuccess}
                 </p>
               )}
+<div className="checkout-privacy">
+  <strong>Aviso de privacidad</strong>
 
+  <p>
+    Los datos que proporciones serán utilizados
+    únicamente para gestionar tu pedido,
+    contactarte, coordinar la entrega y enviarte
+    la confirmación correspondiente.
+  </p>
+
+  <p>
+    La información se almacena de forma
+    restringida y solo será accesible para el
+    equipo autorizado de NATIV y, cuando
+    corresponda, para fines de revisión académica.
+    No compartimos tus datos con terceros con
+    fines comerciales.
+  </p>
+
+  <small>
+    Al confirmar tu compra, aceptas el uso de tus
+    datos para la gestión de tu pedido.
+  </small>
+</div>
               <button
                 className="button button-dark cart-submit"
                 type="submit"
