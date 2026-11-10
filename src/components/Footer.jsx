@@ -37,9 +37,20 @@ export default function Footer({ config }) {
 
           <p>{config.tagline}</p>
 
-          <a className="footer-backtop" href="#inicio">
-            Volver arriba <ArrowUpRight size={15} />
-          </a>
+          <div className="footer-top-actions">
+            <a
+              className="footer-help"
+              href="/Manual_NATIV_Final.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ayuda / Manual <span aria-hidden="true">↗</span>
+            </a>
+
+            <a className="footer-backtop" href="#inicio">
+              Volver arriba <ArrowUpRight size={15} />
+            </a>
+          </div>
         </div>
 
         <div className="footer-bottom">
@@ -51,14 +62,6 @@ export default function Footer({ config }) {
 
           <a href="#pedidos">
             Descubre nuestros sabores <span aria-hidden="true">↗</span>
-          </a>
-
-          <a
-            href="/Manual_NATIV_Final.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Ayuda / Manual <span aria-hidden="true">↗</span>
           </a>
 
           {contacts.map((contact) => (
